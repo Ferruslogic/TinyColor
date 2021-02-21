@@ -1,32 +1,28 @@
 ﻿script "tinyColor"
-# tinyColor v1.0.0b
+# TinyColor v1.0.0b
 # Fast, small color manipulation and conversion for LiveCode.
 
 local sTinyCounter = 0, sColor, sHexNames
-# Parametros
+# Parameters
 # pColor: Color en formato string
-# pOpts["format"]: Formato de salida
-# pOpts["gradientType"]: Tipo de gradiente
-function tinyColor pColor, pOpts
+function tinyColor pColor
     local rgb
-    
+
     put inputToRGB(pColor) into rgb
-    
+
     put pColor into sColor["originalInput"]
     put rgb["r"] into sColor["r"]
     put rgb["g"] into sColor["g"]
     put rgb["b"] into sColor["b"]
     put rgb["a"] into sColor["a"]
-    put rgb["format"] into pOpts["format"]
-    
+
     --if sColor["a"] is not a number then put 0 into sColor["a"]
     put round(100* sColor["a"]) / 100 into sColor["roundA"]
     put rgb["a"] into sColor["a"]
-    
-    if pOpts["format"] is "" then put "rgb" into pOpts["format"]
-    put pOpts["format"] into sColor["format"]
-    put pOpts["gradientType"] into sColor["gradientType"]
-    
+
+    if rgb["format"] is "" then put "rgb" into rgb["format"]
+    put rgb["format"] into sColor["format"]
+
     // Don't let the range of [0,255] come back in [0,1].
     // Potentially lose a little bit of precision here, but will fix issues where
     // .5 gets interpreted as half of the total, instead of half of 1
@@ -34,9 +30,9 @@ function tinyColor pColor, pOpts
     if sColor["r"] < 1 then put round(sColor["r"]) into sColor["r"]
     if sColor["g"] < 1 then put round(sColor["g"]) into sColor["g"]
     if sColor["b"] < 1 then put round(sColor["b"]) into sColor["b"]
-    
+
     put rgb["ok"] into sColor["ok"]
-    
+
     add 1 to sTinyCounter
     put sTinyCounter into sColor["tc_id"]
 end tinyColor
@@ -44,13 +40,11 @@ end tinyColor
 
 #### on tinyColor.prototype ####
 function isDark pRGB
-    local tRGB
-    put _fixRGB(pRGB) into tRGB
     return getBrightness() < 128
 end isDark
 
-function isLight pRGB
-    return not isDark(pRGB)
+function isLight
+    return not isDark()
 end isLight
 
 function isValid
@@ -84,16 +78,16 @@ function getLuminance pRGB
     put tRGB[1]/255 into RsRGB
     put tRGB[2]/255 into GsRGB
     put tRGB[3]/255 into BsRGB
-    
+
     if RsRGB <= 0.03928 then put RsRGB / 12.92 into R
     else put ((RsRGB + 0.055) / 1.055)^2.4 into R
-    
+
     if GsRGB <= 0.03928 then put GsRGB / 12.92 into G
     else put ((GsRGB + 0.055) / 1.055)^2.4 into G
-    
+
     if BsRGB <= 0.03928 then put BsRGB / 12.92 into B
     else put ((BsRGB + 0.055) / 1.055)^2.4 into B
-    
+
     return (0.2126 * R) + (0.7152 * G) + (0.0722 * B)
 end getLuminance
 
@@ -116,7 +110,7 @@ function toHsvString
     put round(hsv[1] * 360) into h
     put round(hsv[2] * 100) into s
     put round(hsv[3] * 100) into v
-    
+
     if sColor["a"] is 1 then return "hsv(" & h & ", " & s & "%, " & v & "%)"
     else return "hsva ( " & h & ", " & s & "%, " & v & "%, " & sColor["roundA"] & " )"
 end toHsvString
@@ -133,7 +127,7 @@ function toHslString
     put round(the item 1 of hsl * 360) into h
     put round(the item 2 of hsl * 100) into s
     put round(the item 3 of hsl * 100) into l
-    
+
     if sColor["a"] is 1 then return "hsl("  & h & ", " & s & "%, " & l & "%)"
     else return "hsla ( " & h & ", " & s & "%, " & l & "%, " & sColor["roundA"] &  " )"
 end toHslString
@@ -169,7 +163,7 @@ end toPercentageRgb
 
 function toPercentageRgbString
     if sColor["a"] is 1 then
-        return "rgb("  && round(bound01( sColor["r"], 255) * 100) & "%, " && round(bound01(sColor["g"], 255) * 100) & "%, " && round(bound01(sColor["b"], 255) * 100) & "%)" 
+        return "rgb("  && round(bound01( sColor["r"], 255) * 100) & "%, " && round(bound01(sColor["g"], 255) * 100) & "%, " && round(bound01(sColor["b"], 255) * 100) & "%)"
     else
         return "rgba("  && round(bound01( sColor["r"], 255) * 100) & "%, " && round(bound01(sColor["g"], 255) * 100) & "%, " && round(bound01(sColor["b"], 255) * 100) & "%, " && sColor["a"] &  ")";
     end if
@@ -180,7 +174,7 @@ function toName
     if sColor["a"] is 0 then return "transparent"
     if sColor["a"] < 1  and sColor["a"] is not empty then return false
     put getColorArray() into tColorNames
-    
+
     return toLower(tColorNames["rgb"][sColor["r"], sColor["g"],sColor["b"]])
 end toName
 
@@ -189,13 +183,13 @@ private function getColorArray
     if sColorArray is an array then return sColorArray
     local  tColorNames, rgb
     put the colornames into tColorNames
-    
+
     repeat for each line tName in tColorNames
         put getRgbFromColor(tName) into rgb
-        
+
         put rgb into sColorArray["name"][tName]
         put tName into sColorArray["rgb"][rgb]
-        
+
     end repeat
     return sColorArray
 end getColorArray
@@ -203,77 +197,77 @@ end getColorArray
 
 function toFilter pSecondColor
     local hex8String, secondHex8String, gradientType
-    
+
     put "#" & rgbaToArgbHex(sColor["r"],sColor["g"],sColor["b"], sColor["a"]) into hex8String
     put hex8String into secondHex8String
-    
+
     if sColor["gradientType"] then put "GradientType = 1, " into gradientType
     else put "" into gradientType
-    
+
     if pSecondColor then
         get tinyColor(pSecondColor)
         put "#" & rgbaToArgbHex(sColor["r"],sColor["g"],sColor["b"], sColor["a"]) into secondHex8String
     end if
-    
+
     return "progid:DXImageTransform.Microsoft.gradient(" & gradientType & "startColorstr=" & hex8String & ",endColorstr=" & secondHex8String & ")"
 end toFilter
 
 
 function toString pFormat
     local formatSet, formattedString = false, hasAlpha, needsAlphaFormat
-    
+
     if pFormat is empty then put sColor["format"] into pFormat
-    
+
     put not ( not pFormat) into formatSet
     put sColor["a"] < 1 and sColor["a"] >= 0 into hasAlpha
     put not formatSet and hasAlpha and (pFormat is among the items "hex,hex6,hex3,hex4,hex8,name") into needsAlphaFormat
-    
+
     if needsAlphaFormat then
         // Special case for "transparent", all other non-alpha formats
         // will return rgba when there is transparency.
         if pFormat is "name" and sColor["a"] is 0 then
             return toName()
         end if
-        
+
         return toRgbString()
     end if
-    
+
     if pFormat is "rgb" then
         put toRgbString() into formattedString
     end if
-    
+
     if pFormat is "prgb" then
         put toPercentageRgbString() into formattedString
     end if
-    
+
     if pFormat is "hex" or pFormat is "hex6" then
         put toHexString() into formattedString
     end if
-    
+
     if pFormat is "hex3" then
         put toHexString(true) into formattedString
     end if
-    
+
     if pFormat is "hex4" then
         put toHex8String(true) into formattedString
     end if
-    
+
     if pFormat is "hex8" then
         put toHex8String() into formattedString
     end if
-    
+
     if pFormat is "name" then
         put toName() into formattedString
     end if
-    
+
     if pFormat is "hsl" then
         put toHslString() into formattedString
     end if
-    
+
     if pFormat is "hsv" then
         put toHsvString() into formattedString
     end if
-    
+
     if formattedString is empty then
         return formattedString
     else
@@ -412,7 +406,7 @@ end tinyColor.fromRatio
 function inputToRGB pColor
     local  rgb, tFormat  = false, ok = false, tResult, tAlfa, input
     local tName
-    
+
     put pColor into tName
     replace space with "" in tName
     // Input is color name
@@ -425,7 +419,7 @@ function inputToRGB pColor
         put "name" into tResult["format"]
         put true into tResult["ok"]
     end if
-    
+
     // Input is color Hex
     if the number of words of pColor is 1 and isHex(pColor) is true then
         replace space with "" in pColor
@@ -438,12 +432,12 @@ function inputToRGB pColor
         put "hex" into tResult["format"]
         put true into tResult["ok"]
     end if
-    
+
     if tResult["format"] is empty and typeof(pColor) is "string" then  put stringInputToObject(pColor) into pColor
-    
+
     if typeof(pColor) is "object" then
         _objectToArray pColor
-        
+
         if isValidCSSUnit(pColor["r"]) and isValidCSSUnit(pColor["g"]) and isValidCSSUnit(pColor["b"]) then
             put rgbToRgb(pColor["r"], pColor["g"], pColor["b"]) into rgb
 
@@ -452,14 +446,14 @@ function inputToRGB pColor
             else
                 put "rgb" into tFormat
             end if
-            
+
             split rgb by comma
             put rgb[1] into tResult["r"]
             put rgb[2] into tResult["g"]
             put rgb[3] into tResult["b"]
             put tFormat into tResult["format"]
             put true into tResult["ok"]
-            
+
         else if isValidCSSUnit(pColor["h"]) and isValidCSSUnit(pColor["s"]) and isValidCSSUnit(pColor["v"]) then
             put convertToPercentage(pColor["s"]) into pColor["s"]
             put convertToPercentage(pColor["v"]) into pColor["v"]
@@ -470,7 +464,7 @@ function inputToRGB pColor
             put rgb[3] into tResult["b"]
             put "hsv" into tResult["format"]
             put true into tResult["ok"]
-            
+
         else if isValidCSSUnit(pColor["h"]) and isValidCSSUnit(pColor["s"]) and isValidCSSUnit(pColor["l"]) then
             put convertToPercentage(pColor["s"]) into pColor["s"]
             put convertToPercentage(pColor["l"]) into pColor["l"]
@@ -481,18 +475,18 @@ function inputToRGB pColor
             put rgb[3] into tResult["b"]
             put "hsl" into tResult["format"]
             put true into tResult["ok"]
-            
+
         end if
     end if
-    
+
     if rgb[4] is not empty then  put rgb[4] into tAlfa
-    
+
     put boundAlpha( tAlfa ) into tAlfa
-    
+
     put min(255, max(tResult["r"], 0)) into tResult["r"]
     put min(255, max(tResult["g"], 0)) into tResult["g"]
     put min(255, max(tResult["b"], 0)) into tResult["b"]
-    
+
     return tResult
 end inputToRGB
 
@@ -1009,7 +1003,7 @@ function tinycolor.isReadable color1, color2, wcag2
     local readability, wcag2Parms,  tOut = false
     put tinycolor.readability(color1, color2) into readability
     put validateWCAG2Parms(wcag2) into wcag2Parms
-    
+
     switch (wcag2Parms["level"] + wcag2Parms["size"])
         case "AAsmall"
         case "AAAlarge"
@@ -1039,11 +1033,11 @@ function  tinycolor.mostReadable baseColor, colorList, args
     local bestColor = "", bestScore = 0, readability, includeFallbackColors, tLevel, tSize, tLength
     if args is empty then put "{}" into args
     _objectToArray args
-    
+
     put args["includeFallbackColors"] into includeFallbackColors
     put args["level"] into tLevel
     put args["size"] into tSize
-    
+
     put the number of elements of colorList into tLength
     repeat with i = 1 to tLength
         put tinyColor.readability(baseColor, colorList[i]) into readability
@@ -1052,7 +1046,7 @@ function  tinycolor.mostReadable baseColor, colorList, args
             put tinycolor( colorList[i] ) into bestColor
         end if
     end repeat
-    
+
     if tinycolor.isReadable(baseColor, bestColor, "{" & quote & "level" & quote & ": " & tLevel, quote & "size" & quote &  ": " & tSize & " }") or not includeFallbackColors then
         return bestColor
     else
@@ -1133,10 +1127,11 @@ end pad2
 
 // Replace a decimal with it's percentage value
 function convertToPercentage n
+    if "%" is in n  then replace "%" with "" in n
     if n <= 1 then
-       put (n * 100) & "%" into n
+        put (n * 100) into n
     end if
-    return n
+    return n  & "%"
 end convertToPercentage
 
 
@@ -1174,14 +1169,14 @@ function stringInputToObject pString
     if "," is in pString then replace "," with " " in pString
     put word 1 of pString into tType
     put word 2 to - 1 of pString into pString
-    
-    if tType is empty and the number of items of pString is in "34" then
-        put "rgb" into tType //SE TOMA COMO RGB POR DEFECTO
+
+    if tType is empty  then
+        return empty
     end if
-    
-    if tType is among the items of "rgb,rgba,hsk,hsv" then
+
+    if tType is among the items of "rgb,rgba,hsl,hsv" then
         put the number of chars of tType into tNum
-        
+
         repeat with x = 1 to tNum
             if tNum is x then
                 put the char x of tType &": "& the word x of pString  after tNewString
