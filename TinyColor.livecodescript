@@ -11,7 +11,7 @@ function tinyColor pColor, pOpts
     local rgb
     
     put inputToRGB(pColor) into rgb
-        
+    
     put pColor into sColor["originalInput"]
     put rgb["r"] into sColor["r"]
     put rgb["g"] into sColor["g"]
@@ -166,6 +166,14 @@ end toRgbString
 function toPercentageRgb
     return "{ r:" & round( bound01(sColor["r"], 255) * 100) & "%, g:" & round(bound01(sColor["g"], 255) * 100) & "% , b:" & round(bound01(sColor["b"], 255) * 100) & "%, a:" & sColor["a"] & "}"
 end toPercentageRgb
+
+function toPercentageRgbString
+    if sColor["a"] is 1 then
+        return "rgb("  && round(bound01( sColor["r"], 255) * 100) & "%, " && round(bound01(sColor["g"], 255) * 100) & "%, " && round(bound01(sColor["b"], 255) * 100) & "%)" 
+    else
+        return "rgba("  && round(bound01( sColor["r"], 255) * 100) & "%, " && round(bound01(sColor["g"], 255) * 100) & "%, " && round(bound01(sColor["b"], 255) * 100) & "%, " && sColor["a"] &  ")";
+    end if
+end toPercentageRgbString
 
 function toName
     local  r, g, b, tColorNames, tResult = ""
@@ -431,15 +439,14 @@ function inputToRGB pColor
         put true into tResult["ok"]
     end if
     
-    if tResult["format"] is empty and typeof(pColor) is "string" then
-        put stringInputToObject(pColor) into pColor
-    end if
+    if tResult["format"] is empty and typeof(pColor) is "string" then  put stringInputToObject(pColor) into pColor
     
     if typeof(pColor) is "object" then
         _objectToArray pColor
-
+        
         if isValidCSSUnit(pColor["r"]) and isValidCSSUnit(pColor["g"]) and isValidCSSUnit(pColor["b"]) then
             put rgbToRgb(pColor["r"], pColor["g"], pColor["b"]) into rgb
+
             if pColor["r"] ends with "%" then
                 put "prgb" into tFormat
             else
@@ -504,7 +511,7 @@ end inputToRGB
 // *Assumes:* r, g, b in [0, 255] or [0, 1]
 // *Returns:* r, g, b in [0, 255]
 function rgbToRgb r, g, b
-    return bound01(r, 255) * 255, bound01(g, 255) * 255, bound01(b, 255) * 255
+    return to255(bound01(r, 255) * 255, bound01(g, 255) * 255, bound01(b, 255) * 255)
 end rgbToRgb
 
 
@@ -1344,4 +1351,12 @@ private function isNaN n
     return n is not a number and n is among the lines of the constantNames for value
 end isNaN
 
+private function to255 r,  g,  b
+    if ("." is in r or "." is in g or "." is in b ) and max(r, g, b) <= 1 then
+        put r * 255 into r
+        put g * 255 into g
+        put b * 255 into b
+    end if
+    return  r, g, b
+end to255
 ### END Utilities ###
