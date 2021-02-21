@@ -11,13 +11,7 @@ function tinyColor pColor, pOpts
     local rgb
     
     put inputToRGB(pColor) into rgb
-    
-    if rgb is not an Array then
-        // TODO: Si pColor no es un color tipo string convertirlo a rgb usando lc.
-        // Esto solo funcionaria si es un RGB, HEX o un nombre.
         
-    end if
-    
     put pColor into sColor["originalInput"]
     put rgb["r"] into sColor["r"]
     put rgb["g"] into sColor["g"]
@@ -42,7 +36,7 @@ function tinyColor pColor, pOpts
     if sColor["b"] < 1 then put round(sColor["b"]) into sColor["b"]
     
     put rgb["ok"] into sColor["ok"]
-
+    
     add 1 to sTinyCounter
     put sTinyCounter into sColor["tc_id"]
 end tinyColor
@@ -408,8 +402,9 @@ end tinyColor.fromRatio
 //     "hsv(0, 100%, 100%)" or "hsv 0 100% 100%"
 //
 function inputToRGB pColor
-    local  rgb, tFormat  = false, ok = false, tResult, tAlfa
+    local  rgb, tFormat  = false, ok = false, tResult, tAlfa, input
     local tName
+    
     put pColor into tName
     replace space with "" in tName
     // Input is color name
@@ -425,10 +420,9 @@ function inputToRGB pColor
     
     // Input is color Hex
     if the number of words of pColor is 1 and isHex(pColor) is true then
-        if not (pColor begins with "#") then
-            put "#" & pColor into pColor
-        end if
-        put getRgbFromColor(pColor) into rgb
+        replace space with "" in pColor
+        if not (pColor begins with "#") then  put "#" & pColor into pColor
+        put getRgbFromColor(the char 1 to 7 of pColor) into rgb
         split rgb by comma
         put rgb[1] into tResult["r"]
         put rgb[2] into tResult["g"]
@@ -443,7 +437,7 @@ function inputToRGB pColor
     
     if typeof(pColor) is "object" then
         _objectToArray pColor
-        
+
         if isValidCSSUnit(pColor["r"]) and isValidCSSUnit(pColor["g"]) and isValidCSSUnit(pColor["b"]) then
             put rgbToRgb(pColor["r"], pColor["g"], pColor["b"]) into rgb
             if pColor["r"] ends with "%" then
@@ -1309,6 +1303,8 @@ private command _objectToArray @pObj
     local tArray
     if char 1 of word 1 of pObj is "{" then delete char 1 of word 1 of pObj
     if char -1 of word -1 of pObj is "}" then delete char -1 of word -1 of pObj
+    put word 1 to - 1 of pObj into pObj
+    replace ", " with "," in pObj
     split pObj by comma and ":"
     return pObj for value
 end _objectToArray
