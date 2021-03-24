@@ -27,6 +27,7 @@ function tinycolor (color, opts) {
     }
 
     var rgb = inputToRGB(color);
+
     this._originalInput = color,
     this._r = rgb.r,
     this._g = rgb.g,
@@ -333,6 +334,7 @@ function inputToRGB(color) {
             s = convertToPercentage(color.s);
             l = convertToPercentage(color.l);
             rgb = hslToRgb(color.h, s, l);
+
             ok = true;
             format = "hsl";
         }
@@ -412,6 +414,8 @@ function rgbToHsl(r, g, b) {
 function hslToRgb(h, s, l) {
     var r, g, b;
 
+
+    
     h = bound01(h, 360);
     s = bound01(s, 100);
     l = bound01(l, 100);
@@ -424,6 +428,7 @@ function hslToRgb(h, s, l) {
         if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
         return p;
     }
+
 
     if(s === 0) {
         r = g = b = l; // achromatic
@@ -592,6 +597,7 @@ function greyscale(color) {
 function lighten (color, amount) {
     amount = (amount === 0) ? 0 : (amount || 10);
     var hsl = tinycolor(color).toHsl();
+
     hsl.l += amount / 100;
     hsl.l = clamp01(hsl.l);
     return tinycolor(hsl);
@@ -603,6 +609,7 @@ function brighten(color, amount) {
     rgb.r = mathMax(0, mathMin(255, rgb.r - mathRound(255 * - (amount / 100))));
     rgb.g = mathMax(0, mathMin(255, rgb.g - mathRound(255 * - (amount / 100))));
     rgb.b = mathMax(0, mathMin(255, rgb.b - mathRound(255 * - (amount / 100))));
+    
     return tinycolor(rgb);
 }
 
@@ -984,21 +991,29 @@ function boundAlpha(a) {
 }
 
 // Take input from [0, n] and return it as [0, 1]
-function bound01(n, max) {
+    function bound01(n, max) {
+
+
     if (isOnePointZero(n)) { n = "100%"; }
 
     var processPercent = isPercentage(n);
+
     n = mathMin(max, mathMax(0, parseFloat(n)));
+
+   
 
     // Automatically convert percentage into number
     if (processPercent) {
         n = parseInt(n * max, 10) / 100;
     }
 
+    
     // Handle floating point rounding errors
     if ((Math.abs(n - max) < 0.000001)) {
         return 1;
     }
+
+
 
     // Convert into [0, 1] range if it isn't already
     return (n % max) / parseFloat(max);
