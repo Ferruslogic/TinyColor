@@ -874,82 +874,132 @@ end complement
 
 
 function triad pColor
-    local hsl, h, triad, tColor
-    put tinyColor(pColor) into tColor
+    local hsl, h, triad, tColor, tOldColor
+    
+    put sColor into tOldColor
+    
+    tinyColor pColor
     put toHsl() into hsl
     _objectToArray hsl
-    put hsl["h"] into hsl
-    put tColor into triad["color-1"]
-    put tinyColor("{ h:" && (h + 120) mod 360, "s: " & hsl["s"], "l: " & hsl["l"] & " }") into triad["color-2"]
-    put tinyColor("{ h:" && (h + 240) mod 360, "s: " & hsl["s"], "l: " & hsl["l"] & " }") into triad["color-3"]
+    put hsl["h"] into h
+    
+    put toRgb(true) into triad[ 1 ]
+    
+    put "{ h:" && (h + 120) mod 360, "s: " & hsl["s"], "l: " & hsl["l"] & " }" into tColor
+    tinyColor tColor
+    put toRgb(true) into triad[2]
+    
+    put "{ h:" && (h + 240) mod 360, "s: " & hsl["s"], "l: " & hsl["l"] & " }" into tColor
+    tinyColor tColor
+    put toRgb(true) into triad[3]
+    
+    put tOldColor into sColor
     return triad
 end triad
 
 
 function tetrad pColor
-    local hsl, h, tetrad, tColor
-    put tinyColor(pColor) into tColor
+    local hsl, h, tetrad, tColor, tOldColor
+    
+    put sColor into tOldColor
+    
+    tinyColor pColor
     put toHsl() into hsl
     _objectToArray hsl
-    put hsl["h"] into h
-    // tinyColor(color)
-    put tColor into tetrad["color-1"]
-    put tinyColor("{ h:" & (h + 90) mod 360, "s: " & hsl["s"], "l: " & hsl["l"] && "}") into tetrad["color-2"]
-    put tinyColor("{ h:" & (h + 180) mod 360, "s: " & hsl["s"], "l: " & hsl["l"] && "}") into tetrad["color-3"]
-    put tinyColor("{ h:" & (h + 270) mod 360, "s: " & hsl["s"], "l: " & hsl["l"] && "}") into tetrad["color-4"]
+    put toRgb(true) into tetrad[ 1 ]
+    
+    put "{ h:" & (h + 90) mod 360, "s: " & hsl["s"], "l: " & hsl["l"] && "}" into tColor
+    tinyColor tColor
+    put toRgb(true) into tetrad[2]
+    
+    put  "{ h:" & (h + 180) mod 360, "s: " & hsl["s"], "l: " & hsl["l"] && "}" into tColor
+    tinyColor tColor
+    put toRgb(true) into tetrad[3]
+    
+    put  "{ h:" & (h + 270) mod 360, "s: " & hsl["s"], "l: " & hsl["l"] && "}" into tColor
+    tinyColor tColor
+    put toRgb(true) into tetrad[4]
+    
     return tetrad
 end tetrad
 
 
 function splitcomplement pColor
-    local hsl, h, tetrad, tColor, tComplement
-    put tinyColor(pColor) into tColor
+    local hsl, h,  tSplitcomplement,  tOldColor
+    
+    put sColor into tOldColor
+    tinyColor pColor
     put toHsl() into hsl
+    put toRgb(true) into tSplitcomplement[ 1 ]
     _objectToArray hsl
     put hsl["h"] into h
-    put tColor into tComplement["color-1"] -- tinyColor(color),
-    put tinyColor("{ h: " & (h + 72) mod 360, "s:" && hsl["s"], "l:" && hsl["l"] & " }") into tComplement["color-2"]
-    put tinyColor("{ h: " & (h + 216) mod 360, "s:" && hsl["s"], "l:" && hsl["l"] & " }") into tComplement["color-2"]
-    return tComplement
+    
+    tinyColor ("{ h: " & (h + 72) mod 360, "s:" && hsl["s"], "l:" && hsl["l"] & " }")
+    put toRgb(true) into tSplitcomplement[ 2 ]
+    
+    tinyColor("{ h: " & (h + 216) mod 360, "s:" && hsl["s"], "l:" && hsl["l"] & " }") 
+    put toRgb(true) into tSplitcomplement[ 3 ]
+    
+    put tOldColor into sColor
+    return tSplitcomplement
 end splitcomplement
 
 
 function analogous pColor, results, pSlices
-    local hsl, tColor, tPart, ret
+    local hsl, tColor, tPart, ret,  tOldColor
+    
+    put sColor into tOldColor
     if results is empty then put 6 into results
     if pSlices is empty then put 30 into pSlices
-    put tinyColor(pColor) into tColor
+    
+    tinyColor pColor
     put toHsl() into hsl
     _objectToArray hsl
     put 360 / pSlices into tPart
-    put tColor into ret[1]
+    
+    put toRgb(true) into ret[1]
     local index = 1
     repeat until (hsl["h"] = ((hsl["h"] - ((tPart * results)/2)) + 720) mod 360 )
+        get (hsl["h"] , ((hsl["h"] - ((tPart * results)/2)) + 720) mod 360 )
+        
         add 1 to index
         put (hsl["h"] + tPart) mod 360 into hsl["h"]
-        put tinyColor("hsl" &&  hsl["h"] & ", "&  hsl["s"] & ", "&  hsl["l"]) into ret[index]
+        tinyColor ("hsl" &&  hsl["h"] & ", "&  hsl["s"] & ", "&  hsl["l"]) 
+        put toRgb(true) into ret[index]
+        
+        if index is 3 then exit repeat -- TODO: Parche temporal ver en la librería original
     end repeat
+    
+    put tOldColor into sColor
     return ret
 end analogous
 
 
 function monochromatic pColor, results
-    local hsv, tColor, ret, h, s, v, modification
-    if results is empty then put 6 into results
-    put tinycolor(pColor) into tColor
+    local hsv, tColor, ret, h, s, v, modification, tOldColor
+    
+    if results is not an integer and (results < 1 or results > 6) then put 6 into results
+    put sColor into tOldColor
+    
+    tinycolor pColor
     put toHsv() into hsv
+    _objectToArray hsv
+    
     put hsv["h"] into h
     put hsv["s"] into s
     put hsv["v"] into v
     put 1 / results into modification
-
+    
     local index = 0
     repeat with i = results down to 1
         add 1 to index
-    # while (results--) {
-        put tinycolor("{ h: " & h," s: " & s," v: " & v & " }") into ret["color-" & index]
+        tinyColor ("{ h: " & h," s: " & s," v: " & v & " }")
+        put toRgb(true) into ret[ index ]
+        
         put (v + modification) mod 1 into v
     end repeat
+    
+    put tOldColor into sColor
     return ret
 end monochromatic
 

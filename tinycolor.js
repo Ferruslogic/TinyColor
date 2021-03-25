@@ -676,6 +676,8 @@ function analogous(color, results, slices) {
     results = results || 6;
     slices = slices || 30;
 
+    console.error(color);
+    
     var hsl = tinycolor(color).toHsl();
     var part = 360 / slices;
     var ret = [tinycolor(color)];
