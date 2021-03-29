@@ -53,6 +53,40 @@ command tinyColor pColor
     get tinyColor(pColor)
 end tinyColor
 
+
+
+function getSystemAppearance
+    
+    switch platform()
+        
+        case "Win32"
+            local tType, tData, tDataReady
+            put queryRegistry("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize\AppsUseLightTheme",tType) into tData
+            
+            put empty into tDataReady
+            repeat for each char tchar in tData
+                put chartonum(tchar) after tDataReady
+            end repeat
+            
+            if tDataReady is "1000" then return "light"
+            else  if tDataReady is "0000" then return "dark" 
+            return empty
+            break
+            
+        case "MacOS"
+        case "iphone"
+        case "android"
+            if the systemAppearance contains "dark" then
+                return "dark"
+            else
+                return "light"
+            end if
+            break
+    end switch
+end getSystemAppearance
+
+
+
 #### on tinyColor.prototype ####
 function isDark pRGB
     return getBrightness() < 128
@@ -945,34 +979,71 @@ function splitcomplement pColor
 end splitcomplement
 
 
-function analogous pColor, results, pSlices
-    local hsl, tColor, tPart, ret,  tOldColor
+function analogous pColor, pResults, pSlices
+    --    local hsl, tColor, tPart, ret,  tOldColor
     
+    --    put sColor into tOldColor
+    --    if results is empty then put 6 into results
+    --    if pSlices is empty then put 30 into pSlices
+    
+    --    tinyColor pColor
+    --    put toHsl() into hsl
+    --    _objectToArray hsl
+    --    put 360 / pSlices into tPart
+    
+    --    put toRgb(true) into ret[1]
+    --    local index = 1
+    
+    --    repeat with r = results down to 1
+    --        add 1 to index
+    
+    --        if  (hsl["h"] = ((hsl["h"] - ( tPart * __MoveOneBitLeft( r )) + 720) mod 360 )) then exit repeat
+    
+    
+    --        put (hsl["h"] + tPart) mod 360 into hsl["h"]
+    --        tinyColor ("hsl" &&  hsl["h"] & ", "&  hsl["s"] & ", "&  hsl["l"]) 
+    --        put toRgb(true) into ret[index]
+    
+    --    end repeat
+    
+    --    put tOldColor into sColor
+    --    return ret
+    local tOldColor, hsl, tPart, tResult
+    if pResults is not an integer then put 6 into pResults
+    if pSlices is not an integer or pSlices is 0 then put 30 into pSlices
     put sColor into tOldColor
-    if results is empty then put 6 into results
-    if pSlices is empty then put 30 into pSlices
     
     tinyColor pColor
     put toHsl() into hsl
     _objectToArray hsl
     put 360 / pSlices into tPart
     
-    put toRgb(true) into ret[1]
-    local index = 1
-    repeat until (hsl["h"] = ((hsl["h"] - ((tPart * results)/2)) + 720) mod 360 )
-        get (hsl["h"] , ((hsl["h"] - ((tPart * results)/2)) + 720) mod 360 )
+    tinyColor pColor
+    put toRgb(true) into tResult[ 1 ]
+    
+    repeat with r = pResults down to 0
+        if hsl["h"] = (( hsl["h"] - tPart * __MoveOneBitLeft( r )) + 720) mod 360 then exit repeat
         
-        add 1 to index
-        put (hsl["h"] + tPart) mod 360 into hsl["h"]
+        put (hsl["h"] + tPart ) mod 360 into hsl["h"]
         tinyColor ("hsl" &&  hsl["h"] & ", "&  hsl["s"] & ", "&  hsl["l"]) 
-        put toRgb(true) into ret[index]
+        put toRgb(true) into tResult[r]
         
-        if index is 3 then exit repeat -- TODO: Parche temporal ver en la librería original
     end repeat
     
+    
+    
     put tOldColor into sColor
-    return ret
+    return tResult
 end analogous
+
+private function __MoveOneBitLeft pNum
+    local tBit
+    
+    put  baseConvert( pNum, 10, 2)  into tBit
+    delete char - 1 of tBit
+    if tBit is not a number then return 0
+    return baseConvert(tBit, 2, 10)
+end __MoveOneBitLeft
 
 
 function monochromatic pColor, results
