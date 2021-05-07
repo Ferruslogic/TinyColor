@@ -980,70 +980,40 @@ end splitcomplement
 
 
 function analogous pColor, pResults, pSlices
-    --    local hsl, tColor, tPart, ret,  tOldColor
+    local hsl, tColor, tPart, ret,  tOldColor, tResult
     
-    --    put sColor into tOldColor
-    --    if results is empty then put 6 into results
-    --    if pSlices is empty then put 30 into pSlices
-    
-    --    tinyColor pColor
-    --    put toHsl() into hsl
-    --    _objectToArray hsl
-    --    put 360 / pSlices into tPart
-    
-    --    put toRgb(true) into ret[1]
-    --    local index = 1
-    
-    --    repeat with r = results down to 1
-    --        add 1 to index
-    
-    --        if  (hsl["h"] = ((hsl["h"] - ( tPart * __MoveOneBitLeft( r )) + 720) mod 360 )) then exit repeat
-    
-    
-    --        put (hsl["h"] + tPart) mod 360 into hsl["h"]
-    --        tinyColor ("hsl" &&  hsl["h"] & ", "&  hsl["s"] & ", "&  hsl["l"]) 
-    --        put toRgb(true) into ret[index]
-    
-    --    end repeat
-    
-    --    put tOldColor into sColor
-    --    return ret
-    local tOldColor, hsl, tPart, tResult
-    if pResults is not an integer then put 6 into pResults
-    if pSlices is not an integer or pSlices is 0 then put 30 into pSlices
     put sColor into tOldColor
+    if pResults is no an integer then put 6 into pResults
+    if pSlices is no an integer then put 30 into pSlices
     
     tinyColor pColor
     put toHsl() into hsl
     _objectToArray hsl
-    put 360 / pSlices into tPart
     
-    tinyColor pColor
+    put 360 / pSlices into tPart
+    tinycolor pColor
     put toRgb(true) into tResult[ 1 ]
     
-    repeat with r = pResults down to 0
-        if hsl["h"] = (( hsl["h"] - tPart * __MoveOneBitLeft( r )) + 720) mod 360 then exit repeat
+    put (( hsl[ "h" ] - (  tPart * _rightShift( pResults , 1 )) )+ 720 ) mod 360 into hsl[ "h" ]
+    
+    local index = 1
+    repeat with x = (pResults - 1 ) down to 1
+        add 1 to index
+        put  ( hsl[ "h" ] + tPart ) mod 360 into hsl[ "h" ]
         
-        put (hsl["h"] + tPart ) mod 360 into hsl["h"]
         tinyColor ("hsl" &&  hsl["h"] & ", "&  hsl["s"] & ", "&  hsl["l"]) 
-        put toRgb(true) into tResult[r]
+        put toRgb(true) into tResult[ index ]
         
     end repeat
     
-    
+    --    repeat for each key k in tResult
+    --        put empty into tResult[ k]
+    --    end repeat
     
     put tOldColor into sColor
     return tResult
 end analogous
 
-private function __MoveOneBitLeft pNum
-    local tBit
-    
-    put  baseConvert( pNum, 10, 2)  into tBit
-    delete char - 1 of tBit
-    if tBit is not a number then return 0
-    return baseConvert(tBit, 2, 10)
-end __MoveOneBitLeft
 
 
 function monochromatic pColor, results
@@ -1487,5 +1457,15 @@ private function isNaN n
     return n is not a number and n is among the lines of the constantNames for value
 end isNaN
 
+private function _rightShift pNum, pOff
+    if pNum >= 0 then 
+        return trunc( pNum /(2^ pOff ))
+    else
+        return  round( (pNum - 1) /(2 ^ pOff )) 
+    end if
+end _rightShift
 
 ### END Utilities ###
+
+
+
