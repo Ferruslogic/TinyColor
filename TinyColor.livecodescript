@@ -1195,27 +1195,27 @@ function bound01 n, pMax
     return (n mod pMax) / parseFloat(pMax)
 end bound01
 
-// Force a number between 0 and 1
-function clamp01 val
-    return min(1, max(0, val))
-end clamp01
+--// Force a number between 0 and 1
+--function clamp01 val
+--    return min(1, max(0, val))
+--end clamp01
 
 // Parse a base-16 hex value into a base-10 integer
-function parseIntFromHex val
-    return parseInt(val, 16)
-end parseIntFromHex
+--function parseIntFromHex val
+--    return parseInt(val, 16)
+--end parseIntFromHex
 
 
-// Need to handle 1.0 as 100%, since once it is a number, there is no difference between it and 1
-function isOnePointZero n
-    return n begins with "1.0" and the length of n is 3
-end isOnePointZero
+--// Need to handle 1.0 as 100%, since once it is a number, there is no difference between it and 1
+--function isOnePointZero n
+--    return n begins with "1.0" and the length of n is 3
+--end isOnePointZero
 
 
-// Check to see if string passed in is a percentage
-function isPercentage n
-    return n ends with "%"
-end isPercentage
+--// Check to see if string passed in is a percentage
+--function isPercentage n
+--    return n ends with "%"
+--end isPercentage
 
 
 // Force a hex value to have 2 characters
@@ -1432,14 +1432,14 @@ private function toFixed n,fix
 end toFixed
 
 
-private function parseInt pNum,pOriginalBase
-    if pOriginalBase is empty then put 10 into pOriginalBase
-    try
-        return trunc(baseConvert( trunc(pNum),pOriginalBase,10)) for value
-    catch tError
-        return "Error in parseInt"  for value
-    end try
-end parseInt
+--private function parseInt pNum,pOriginalBase
+--    if pOriginalBase is empty then put 10 into pOriginalBase
+--    try
+--        return trunc(baseConvert( trunc(pNum),pOriginalBase,10)) for value
+--    catch tError
+--        return "Error in parseInt"  for value
+--    end try
+--end parseInt
 
 private function parseFloat pString
     local tFloat, d = 0

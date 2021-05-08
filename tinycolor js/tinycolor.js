@@ -647,6 +647,12 @@ function triad(color) {
 function tetrad(color) {
     var hsl = tinycolor(color).toHsl();
     var h = hsl.h;
+
+    console.warn("h", h)
+    console.warn("h1", (h + 90) % 360)
+    console.warn("h2", (h + 180) % 360)
+    console.warn("h3", (h + 270) % 360)
+
     return [
         tinycolor(color),
         tinycolor({ h: (h + 90) % 360, s: hsl.s, l: hsl.l }),
@@ -669,6 +675,9 @@ function analogous(color, results, slices) {
     results = results || 6;
     slices = slices || 30;
 
+
+
+
     var hsl = tinycolor(color).toHsl();
     var part = 360 / slices;
     var ret = [tinycolor(color)];
@@ -677,6 +686,8 @@ function analogous(color, results, slices) {
         hsl.h = (hsl.h + part) % 360;
         ret.push(tinycolor(hsl));
     }
+
+
     return ret;
 }
 
