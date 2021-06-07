@@ -1,0 +1,126 @@
+
+library com.ferruslogic.library.tinycolor
+
+metadata version is "0.0.1"
+metadata author is "FerrusLogic"
+metadata title is "tinycolor"
+
+
+
+
+use com.livecode.engine
+use com.livecode.canvas
+use com.livecode.math
+use com.livecode.foreign
+use com.livecode.bitwise
+
+
+//foreign MCNumberFetchAsInteger
+
+__safe foreign handler MCNumberFetchAsInteger(inout pNumber as Number) returns Boolean binds to "MCNumberFetchAsInteger"
+__safe foreign handler MCArithmeticExecParseStringAsNumber(in pString as String) returns Number binds to "MCArithmeticExecParseStringAsNumber"
+__safe foreign handler MCMathEvalConvertToBase10(in Operand as String, in Source as LCInt, out Value as LCInt) returns nothing binds to "<builtin>"
+__safe foreign handler MCMathEvalTruncNumber(in Operand as Number, out Value as Number) returns nothing binds to "<builtin>"
+
+
+//bool MCMathConvertToBase10(MCStringRef p_source, integer_t p_source_base, bool& r_negative, uinteger_t& r_result, bool& r_error)
+
+//MCArithmeticExecParseStringAsNumber
+
+public handler Test()
+variable tNumber as optional Number
+
+log MCMathEvalConvertToBase10("101", 2,tNumber)
+log tNumber
+end handler
+
+
+
+public handler parseIntFromHex(in pVal as String) returns Integer
+	 return parseInt(pVal, 16)
+end handler
+
+/*function boundAlpha(a) {
+    a = parseFloat(a);
+
+    if (isNaN(a) || a < 0 || a > 1) {
+        a = 1;
+    }
+
+    return a;
+}*/
+
+
+public handler parseInt(in pString as String,in pBase as optional Integer) returns Integer
+	variable tResult as Integer
+	variable tBase as Integer
+
+	if pBase is nothing or pBase=0 then
+		if the number of chars in pString >1 then
+			if char 1 to 2 of  pString is "0x" then
+				put 16 into tBase
+				put char 3 to -1 of pString into pString
+			else
+				put 10 into tBase
+			end if
+		else
+			put 10 into tBase
+		end if
+	else
+		if the number of chars in pString >1 then
+			if char 1 to 2 of  pString is "0x" then
+				put char 3 to -1 of pString into pString
+			end if
+
+		end if
+		put pBase into tBase
+	end if
+
+	variable tNumber as Integer
+
+	if tBase =10 then
+		put ( MCArithmeticExecParseStringAsNumber(pString)) into tNumber
+		MCMathEvalTruncNumber(tNumber,tNumber)
+	else
+
+		MCMathEvalConvertToBase10(pString, tBase,tNumber)
+		MCMathEvalTruncNumber(tNumber,tNumber)
+
+	end if
+
+	return tNumber
+end handler
+
+
+
+
+// Force a number between 0 and 1
+public handler clamp01(in pVal as Number) returns Integer
+	return Min(1,Max(0,pVal))
+end handler
+
+
+// Check to see if string passed in is a percentage
+public handler isPercentage(in pN ) returns Boolean
+	return (pN is a string and char -1 of pN is "%")
+end handler
+
+
+// Need to handle 1.0 as 100%, since once it is a number, there is no difference between it and 1
+// <http://stackoverflow.com/questions/7422072/javascript-how-to-detect-number-as-a-decimal-including-1-0>
+public handler isOnePointZero(in pN ) returns Boolean
+	return (pN is a string and  pN is "1.0")
+end handler
+
+
+
+
+//public handler rgbToHsl(in pR as Integer, in pG as Integer, in pB as Integer) returns Number
+	//	return  pA shifted right by pB bitwise
+//end handler
+
+
+
+
+
+end library

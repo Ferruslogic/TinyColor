@@ -1,0 +1,18 @@
+import module com.ferruslogic.library.tinycolor
+  use com.livecode.foreign
+  use com.livecode.math
+  use com.livecode.engine
+  use com.livecode.arithmetic
+  use com.livecode.binary
+  use com.livecode.list
+  use com.livecode.logic
+  use com.livecode.string
+  use com.livecode.type
+  use com.livecode.char
+  handler Test() returns optional any
+  handler parseIntFromHex(in pVal as String) returns Number
+  handler parseInt(in pString as String, in pBase as optional Number) returns Number
+  handler clamp01(in pVal as Number) returns Number
+  handler isPercentage(in pN as optional any) returns Boolean
+  handler isOnePointZero(in pN as optional any) returns Boolean
+end module
