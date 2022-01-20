@@ -1160,6 +1160,7 @@ end mostReadable
 // ---------
 // Return a valid alpha value [0,1] with all invalid values being set to 1
 function boundAlpha pA
+    put parseFloat(pA) into pA
     if isNaN(pA) or pA < 0 or pA > 1 then
         put 1 into pA
     end if
@@ -1173,7 +1174,7 @@ function bound01 n, pMax
     if isOnePointZero(n) then put "100%" into n
 
     put isPercentage(n) into processPercent
-    put min(pMax, max(0, n)) into n
+    put min(pMax, max(0, parseFloat(n))) into n
 
     // Automatically convert percentage into number
     if processPercent is true then
@@ -1186,30 +1187,30 @@ function bound01 n, pMax
     end if
 
     // Convert into [0, 1] range if it isn't already
-    return (n mod pMax) / pMax
+    return (n mod pMax) / parseFloat(pMax)
 end bound01
 
---// Force a number between 0 and 1
---function clamp01 val
---    return min(1, max(0, val))
---end clamp01
+// Force a number between 0 and 1
+function clamp01 val
+  return min(1, max(0, val))
+end clamp01
 
 // Parse a base-16 hex value into a base-10 integer
---function parseIntFromHex val
---    return parseInt(val, 16)
---end parseIntFromHex
+function parseIntFromHex val
+   return parseInt(val, 16)
+end parseIntFromHex
 
 
---// Need to handle 1.0 as 100%, since once it is a number, there is no difference between it and 1
---function isOnePointZero n
---    return n begins with "1.0" and the length of n is 3
---end isOnePointZero
+// Need to handle 1.0 as 100%, since once it is a number, there is no difference between it and 1
+function isOnePointZero n
+   return n begins with "1.0" and the length of n is 3
+end isOnePointZero
 
 
---// Check to see if string passed in is a percentage
---function isPercentage n
---    return n ends with "%"
---end isPercentage
+// Check to see if string passed in is a percentage
+function isPercentage n
+  return n ends with "%"
+end isPercentage
 
 
 // Force a hex value to have 2 characters
@@ -1231,7 +1232,7 @@ end convertToPercentage
 
 // Converts a decimal to a hex value
 function convertDecimalToHex d
-    return baseConvert(round(d * 255),10,16)
+    return baseConvert(round(parseFloat(d) * 255),10,16)
 end convertDecimalToHex
 
 
@@ -1426,15 +1427,26 @@ private function toFixed n,fix
 end toFixed
 
 
---private function parseInt pNum,pOriginalBase
---    if pOriginalBase is empty then put 10 into pOriginalBase
---    try
---        return trunc(baseConvert( trunc(pNum),pOriginalBase,10)) for value
---    catch tError
---        return "Error in parseInt"  for value
---    end try
---end parseInt
+private function parseInt pNum,pOriginalBase
+   if pOriginalBase is empty then put 10 into pOriginalBase
+   try
+      return trunc(baseConvert( trunc(pNum),pOriginalBase,10)) for value
+   catch tError
+      return "Error in parseInt"  for value
+   end try
+end parseInt
 
+private function parseFloat pString
+    local tFloat, d = 0
+    replace space with "" in pString
+    repeat for each char c in pString
+        if c is "." then add 1 to d
+        if c is not in "+-.0123456789" or d > 1 then exit repeat
+        put c after tFloat
+    end repeat
+    if "." is not in tFloat then return tFloat
+    return tFloat
+end parseFloat
 
 private function isNaN n
     return n is not a number and n is among the lines of the constantNames for value
