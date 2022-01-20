@@ -239,7 +239,7 @@ function toPercentageRgbString
 end toPercentageRgbString
 
 
----> TinyColor cuenta con una relacion de 539 nombre de colores diferentes
+---> 539 different color names 
 function toName
     local  r, g, b, tColorNames, tResult = ""
     if sColor["a"] is 100 then return "transparent"
