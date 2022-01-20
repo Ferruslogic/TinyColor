@@ -1,6 +1,18 @@
 ﻿script "tinyColor"
-# TinyColor v1.0.0b
-# Fast, small color manipulation and conversion for LiveCode.
+--------------------------------------------------------------------------------------------------------------------------
+# This code is based on the TinyColor v1.4.2 micro framework created by Brian Grinstead.
+# Which we can find at https://github.com/bgrins/TinyColor.
+#
+#  Name: TinyColor
+#  Type: Library
+#  Version: v1.0.0b
+#  Translate code to livecode script: FerrusLogic team
+#  Code repository: https://github.com/Ferruslogic/PhotonJSON/
+#  Web: https://ferruslogic.com/
+#  License: https://opensource.org/licenses/MIT
+#  Description: Fast, small color manipulation and conversion for LiveCode.
+--------------------------------------------------------------------------------------------------------------------------
+
 
 local sTinyCounter = 0, sColor, sHexNames
 
@@ -10,41 +22,41 @@ local sTinyCounter = 0, sColor, sHexNames
 # pOpts["gradientType"]: Tipo de gradiente
 function tinyColor pColor, pOpts
     local rgb, tFormat
-    
+
     delete local sColor
-    
+
     put inputToRGB( pColor ) into rgb
     if rgb is empty then   return "error: input is not string color"
-    
+
     put pColor into sColor["originalInput"]
     put rgb["r"] into sColor["r"]
     put rgb["g"] into sColor["g"]
     put rgb["b"] into sColor["b"]
     put rgb["a"] into sColor["a"]
-    
+
     if sColor["a"] is not a number then put 0 into sColor["a"]
     put round(100* sColor["a"]) / 100 into sColor["roundA"]
     if  rgb["a"] is a integer then put rgb["a"] into sColor["a"]
-    
+
     put pOpts["format"] into tFormat
-    
+
     if rgb["format"] is "" then put "rgb" into rgb["format"]
     put rgb["format"] into sColor["format"]
     put pOpts["gradientType"] into sColor["gradientType"]
-    
+
     // Don't let the range of [0,255] come back in [0,1].
     // Potentially lose a little bit of precision here, but will fix issues where
     // .5 gets interpreted as half of the total, instead of half of 1
     // If it was supposed to be 128, this was already taken care of by `inputToRgb`
     if sColor["r"] < 1 then put trunc( sColor["r"] ) into sColor["r"]
     if sColor["g"] < 1 then put trunc( sColor["g"] ) into sColor["g"]
-    if sColor["b"] < 1 then put trunc( sColor["b"] ) into sColor["b"]    
-    
+    if sColor["b"] < 1 then put trunc( sColor["b"] ) into sColor["b"]
+
     put rgb["ok"] into sColor["ok"]
-    
+
     add 1 to sTinyCounter
     put sTinyCounter into sColor["tc_id"]
-    
+
     return toString(tFormat)
 end tinyColor
 
@@ -56,26 +68,22 @@ end tinyColor
 
 
 function getSystemAppearance
-    
     switch platform()
-        
-        case "Win32"
+      case "Win32"
             local tType, tData, tDataReady
             put queryRegistry("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize\AppsUseLightTheme",tType) into tData
-            
             put empty into tDataReady
+
             repeat for each char tchar in tData
                 put chartonum(tchar) after tDataReady
             end repeat
-            
+
             if tDataReady is "1000" then return "light"
-            else  if tDataReady is "0000" then return "dark" 
+            else  if tDataReady is "0000" then return "dark"
             return empty
             break
-            
-        case "MacOS"
-        case "iphone"
-        case "android"
+
+        case "MacOS";case "iphone";case "android"
             if the systemAppearance contains "dark" then
                 return "dark"
             else
@@ -86,9 +94,8 @@ function getSystemAppearance
 end getSystemAppearance
 
 
-
 #### on tinyColor.prototype ####
-function isDark pRGB
+function isDark
     return getBrightness() < 128
 end isDark
 
@@ -193,9 +200,11 @@ function toHex8 allow4Char
     return rgbaToHex(sColor["r"], sColor["g"], sColor["b"], sColor["a"], allow4Char);
 end toHex8
 
+
 function toHex8String allow4Char
     return  toHex8(allow4Char)
 end toHex8String
+
 
 function toRgb pValues
     if pValues is not true then
@@ -207,9 +216,7 @@ function toRgb pValues
             return  round(sColor["r"]), round(sColor["g"]), round( sColor["b"]) 
         end if
     end if
-    
 end toRgb
-
 
 
 function toRgbString
@@ -217,9 +224,11 @@ function toRgbString
     else return "rgba( " & round(sColor["r"])& ", " & round(sColor["g"]) & ", " & round(sColor["b"])& ", " & sColor["roundA"] & " )"
 end toRgbString
 
+
 function toPercentageRgb
     return "{ r:" & round( bound01(sColor["r"], 255) * 100) & "%, g:" & round(bound01(sColor["g"], 255) * 100) & "% , b:" & round(bound01(sColor["b"], 255) * 100) & "%, a:" & sColor["a"] & "}"
 end toPercentageRgb
+
 
 function toPercentageRgbString
     if sColor["a"] is 0 then
@@ -236,7 +245,7 @@ function toName
     if sColor["a"] is 100 then return "transparent"
     if sColor["a"] < 0  and sColor["a"] is not empty then return false
     put getColorArray() into tColorNames
-    
+
     put toLower(tColorNames["rgb"][round(sColor["r"]), round(sColor["g"]),round(sColor["b"])]) into tResult
     if tResult is empty then return "none"
     return tResult
@@ -245,29 +254,27 @@ end toName
 local sColorArray
 private function getColorArray
     local  tColorNames, rgb, tem
-    
+
     put the colorNames into tColorNames
     put "darkturquoise|0,206,209@palegoldenrod|238,232,170@azure|240,255,255@lightgray|211,211,211@darkseagreen|143,188,143@royalblue|65,105,225@khaki|240,230,140@silver|192,192,192@mediumpurple|147,112,219@purple|128,0,128@gainsboro|220,220,220@darkslateblue|72,61,139@palegreen|152,251,152@darkorange|255,140,0@lightgrey|211,211,211@maroon|128,0,0@mediumorchid|186,85,211@lightsteelblue|176,196,222@darkgoldenrod|184,134,11@darkkhaki|189,183,107@hotpink|255,105,180@mediumseagreen|60,179,113@coral|255,127,80@rosybrown|188,143,143@teal|0,128,128@midnightblue|25,25,112@plum|221,160,221@violet|238,130,238@linen|250,240,230@gold|255,215,0@floralwhite|255,250,240@chocolate|210,105,30@lavender|230,230,250@indigo|75,0,130@slategrey|112,128,144@darkolivegreen|85,107,47@ghostwhite|248,248,255@sandybrown|244,164,96@peru|205,133,63@firebrick|178,34,34@burlywood|222,184,135@aliceblue|240,248,255@lightgoldenrodyellow|250,250,210@darkslategrey|47,79,79@darksalmon|233,150,122@skyblue|135,206,235@ivory|255,255,240@lightcoral|240,128,128@mintcream|245,255,250@pink|255,192,203@saddlebrown|139,69,19@papayawhip|255,239,213@lightskyblue|135,206,250@olivedrab|107,142,35@darkslategray|47,79,79@beige|245,245,220@lightslategrey|119,136,153@lightpink|255,182,193@blanchedalmond|255,235,205@brown|165,42,42@olive|128,128,0@cadetblue|95,158,160@palevioletred|219,112,147@slategray|112,128,144@lightslategray|119,136,153@moccasin|255,228,181@wheat|245,222,179@thistle|216,191,216@salmon|250,128,114@oldlace|253,245,230@powderblue|176,224,230@burntsienna|234,126,93@crimson|220,20,60@rebeccapurple|102,51,153@mediumturquoise|72,209,204@paleturquoise|175,238,238@orange|255,165,0@green|0,128,0@cornsilk|255,248,220@darkorchid|153,50,204@darkviolet|148,0,211@antiquewhite|250,235,215@" into tem
     split tem by "@" and "|"
     put tem into sColorArray["name"]
-    
+
     put "0,206,209|darkturquoise@238,232,170|palegoldenrod@240,255,255|azure@211,211,211|lightgray@143,188,143|darkseagreen@65,105,225|royalblue@240,230,140|khaki@192,192,192|silver@147,112,219|mediumpurple@128,0,128|purple@220,220,220|gainsboro@72,61,139|darkslateblue@152,251,152|palegreen@255,140,0|darkorange@211,211,211|lightgrey@128,0,0|maroon@186,85,211|mediumorchid@176,196,222|lightsteelblue@184,134,11|darkgoldenrod@189,183,107|darkkhaki@255,105,180|hotpink@60,179,113|mediumseagreen@255,127,80|coral@188,143,143|rosybrown@0,128,128|teal@25,25,112|midnightblue@221,160,221|plum@238,130,238|violet@250,240,230|linen@255,215,0|gold@255,250,240|floralwhite@210,105,30|chocolate@230,230,250|lavender@75,0,130|indigo@112,128,144|slategrey@85,107,47|darkolivegreen@248,248,255|ghostwhite@244,164,96|sandybrown@205,133,63|peru@178,34,34|firebrick@222,184,135|burlywood@240,248,255|aliceblue@250,250,210|lightgoldenrodyellow@47,79,79|darkslategrey@233,150,122|darksalmon@135,206,235|skyblue@255,255,240|ivory@240,128,128|lightcoral@245,255,250|mintcream@255,192,203|pink@139,69,19|saddlebrown@255,239,213|papayawhip@135,206,250|lightskyblue@107,142,35|olivedrab@47,79,79|darkslategray@245,245,220|beige@119,136,153|lightslategrey@255,182,193|lightpink@255,235,205|blanchedalmond@165,42,42|brown@128,128,0|olive@95,158,160|cadetblue@219,112,147|palevioletred@112,128,144|slategray@119,136,153|lightslategray@255,228,181|moccasin@245,222,179|wheat@216,191,216|thistle@250,128,114|salmon@253,245,230|oldlace@176,224,230|powderblue@234,126,93|burntsienna@220,20,60|crimson@102,51,153|rebeccapurple@72,209,204|mediumturquoise@175,238,238|paleturquoise@255,165,0|orange@0,128,0|green@255,248,220|cornsilk@153,50,204|darkorchid@148,0,211|darkviolet@250,235,215|antiquewhite@" into tem
     split tem by "@" and "|"
     put tem into sColorArray["rgb"]
-    
-    
+
+
     repeat for each line tName in tColorNames
-        -- Colores que tienen el mismo rgb que otros. Ej gray0 = black
+        -- Colors that have the same RGB as others. Ej gray0 = black
         if tName is among the words of "Yellow1 Gray100 IndianRed4 Tan3 SeaGreen4 DarkSalmon DarkOrange4 Firebrick3 PaleGreen2 OrangeRed4 NavyBlue gray0 Azure1 Chartreuse1 Coral1 CornSilk1 Chocolate1 Chocolate2 Chocolate3  Chocolate4 Firebrick4 Ivory1 LightCyan1 Magenta4 Aquamarine3"
-        then next repeat 
-        
+        then next repeat
+
         put getRgbFromColor(tName) into rgb
-        
         put rgb into sColorArray["name"][tName]
         put tName into sColorArray["rgb"][rgb]
-        
     end repeat
-    
+
     return sColorArray
 end getColorArray
 
@@ -356,11 +363,7 @@ private function tinyClone
     return toString()
 end tinyClone
 
-
-
 #### END tinyColor.prototype ####
-
-
 // If input is an object, force 1 into "1.0" to handle ratios properly
 // String input requires "1.0" as input, so 1 will be treated as 1
 function tinyColor.fromRatio pColor, opts
@@ -404,8 +407,8 @@ function inputToRGB pColor
 
     put pColor into tName
     replace space with "" in tName
-    
-    // Input is color name
+
+    # Input is color name
     if tName is among the lines of the colorNames then
         put getRgbFromColor(tName) into rgb
         split rgb by comma
@@ -416,7 +419,7 @@ function inputToRGB pColor
         put true into tResult["ok"]
     end if
 
-    // Input is color Hex
+    # Input is color Hex
     if the number of words of pColor is 1 and isHex(pColor) is true then
         replace space with "" in pColor
         if not (pColor begins with "#") then  put "#" & pColor into pColor
@@ -494,7 +497,6 @@ end inputToRGB
 
 // Conversion Functions
 // --------------------
-
 // `rgbToHsl`, `rgbToHsv`, `hslToRgb`, `hsvToRgb` modified from:
 // <http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript>
 
@@ -519,29 +521,29 @@ end rgbToRgb
 // *Returns:* h, s, l in [0,1]
 function rgbToHsl r, g, b
     local tMx, tMn,  h, s, l, d
-    
+
     put bound01(r,255) into r
     put bound01(g,255) into g
     put bound01(b,255) into b
-    
+
     put max(r,g,b) into tMx
     put min(r,g,b) into tMn
-    
+
     put (tMx + tMn) / 2 into l
-    
+
     if tMx is tMn then
         // achromatic
         put 0 into h
         put 0 into s
     else
         put tMx - tMn into d
-        
+
         if l > 0.5 then
             put d / (2 - tMx - tMn) into s
         else
             put d / (tMx + tMn) into s
         end if
-        
+
         switch tMx
             case r
                 local t
@@ -552,19 +554,19 @@ function rgbToHsl r, g, b
                 end if
                 put (g - b) / d + t into h
                 break
-                
+
             case g
                 put (b - r) / d + 2 into h
                 break
-                
+
             case b
                 put (r - g) / d + 4 into  h
                 break
         end switch
-        
+
         put h/6 into h
     end if
-    
+
     return  h, s, l
 end rgbToHsl
 
@@ -575,11 +577,11 @@ end rgbToHsl
 // *Returns:* r, g, b in the set [0, 255]
 function hslToRgb h, s, l
     local r, g, b ,q, p
-    
+
     put bound01(h, 360) into h
     put bound01(s, 100) into s
     put bound01(l, 100) into l
-    
+
     if s is 0 then
         // achromatic
         put  round(l * 255) into l
@@ -590,14 +592,13 @@ function hslToRgb h, s, l
         else
             put l + s - l * s into q
         end if
-        
+
         put 2 * l - q into p
-        
         put hue2rgb(p, q, h + 1/3) into r
         put hue2rgb(p, q, h) into g
         put hue2rgb(p, q, h - 1/3) into b
     end if
-    
+
     return  round(r * 255), round(g * 255), round(b * 255)
 end hslToRgb
 
@@ -708,7 +709,7 @@ end rgbToHex
 // a in [0, 1]. Returns a 4 or 8 character rgba hex
 function rgbaToHex r, g, b, pA, allow4Char
     local hex, tA
-    
+
     put baseconvert( round(r),10,16 ) into r
     if the length  of r < 2 then put 0 &  r into r
     put baseconvert( round(g),10,16 ) into g
@@ -718,7 +719,7 @@ function rgbaToHex r, g, b, pA, allow4Char
     put convertDecimalToHex(pA) into tA
     put baseconvert( round(tA),10,16 ) into tA
     if the length  of tA < 2 then put 0 &  tA into tA
-    
+
     return "#" & toLower( r & g & b & tA)
 end rgbaToHex
 
@@ -749,10 +750,10 @@ function tinyColor.equals color1, color2
     if color1 is empty or color2 is empty then return false
      tinyColor color1
      put toRgbString() into color1
-     
+
     tinyColor color2
     put toRgbString() into color2
-    
+
     return color1 is color2
 end tinyColor.equals
 
@@ -769,19 +770,19 @@ end tinyColor.random
 
 function desaturate pColor, amount
     local hsl, l, tBaseColor, tDesaturateColor
+
     put sColor into tBaseColor
-    
     if pColor is not empty then tinyColor pColor
     if amount is not an integer then put 20 into amount
-    
+
     put toHsl() into hsl
     _objectToArray hsl
-    
+
     put hsl["s"] - (amount / 100) into hsl["s"]
     put clamp01(hsl["s"]) into  hsl["s"]
-    
+
     put tinyColor("hsl" && hsl["h"] & ", " & hsl["s"] & ", " & hsl["l"]) into tDesaturateColor
-    
+
     if tBaseColor is not empty then put tBaseColor into sColor
     return tDesaturateColor
 end desaturate
@@ -790,18 +791,18 @@ end desaturate
 function saturate pColor, amount
     local hsl, l, tBaseColor, tSaturateColor
     put sColor into tBaseColor
-    
+
     if pColor is not empty then tinyColor pColor
     if amount is not an integer then put 20 into amount
-    
+
     put toHsl() into hsl
     _objectToArray hsl
-    
+
     put hsl["s"] + (amount / 100) into hsl["s"]
     put clamp01(hsl["s"]) into  hsl["s"]
-    
+
     put tinyColor("hsl" && hsl["h"] & ", " & hsl["s"] & ", " & hsl["l"]) into tSaturateColor
-    
+
     if tBaseColor is not empty then put tBaseColor into sColor
     return tSaturateColor
 end saturate
@@ -812,21 +813,19 @@ function greyScale pColor
 end greyScale
 
 function lighten pColor, amount
-    
     local hsl, l, tBaseColor, tLightenColor
     put sColor into tBaseColor
-    
+
     if pColor is not empty then tinyColor pColor
     if amount is not an integer then put 20 into amount
-    
+
     put toHsl() into hsl
     _objectToArray hsl
-    
+
     put amount/ 100  + hsl["l"]  into hsl["l"]
     put clamp01(hsl["l"]) into  hsl["l"]
-    
     put tinyColor("hsl" && hsl["h"] & ", " & hsl["s"] & ", " & hsl["l"]) into tLightenColor
-    
+
     if tBaseColor is not empty then put tBaseColor into sColor
     return tLightenColor
 end lighten
@@ -834,23 +833,22 @@ end lighten
 
 function brighten pColor, amount
     local rgb, tBaseColor, tBrightenColor
-    
+
     put sColor into tBaseColor
-    
+
     if amount is not an integer then put 20 into amount
     if pColor is not empty then  tinyColor pColor
-    
     put toRgb() into rgb
     _objectToArray rgb
-    
+
     put max(0, min(255, rgb["r"] - round(255 * - (amount / 100)))) into rgb["r"]
     put max(0, min(255, rgb["g"] - round(255 * - (amount / 100)))) into rgb["g"]
     put max(0, min(255, rgb["b"] - round(255 * - (amount / 100)))) into rgb["b"]
-    
+
     tinyColor ("rgb" && rgb["r"] && rgb["g"] && rgb["b"])
     put toRgb(true) into tBrightenColor
-    put tBaseColor into sColor  
-    
+    put tBaseColor into sColor
+
     return tBrightenColor
 end brighten
 
@@ -858,18 +856,17 @@ end brighten
 function darken pColor, amount
     local hsl, l, tBaseColor, tDarkenColor
     put sColor into tBaseColor
-    
+
     if pColor is not empty then tinyColor pColor
     if amount is not an integer then put 20 into amount
-    
+
     put toHsl() into hsl
     _objectToArray hsl
-    
+
     put hsl["l"] - amount / 100 into hsl["l"]
     put clamp01( hsl["l"]) into  hsl["l"]
-    
     put tinyColor("hsl" && hsl["h"] & ", " & hsl["s"] & ", " & hsl["l"]) into tDarkenColor
-    
+
     if tBaseColor is not empty then put tBaseColor into sColor
     return tDarkenColor
 end darken
@@ -909,24 +906,23 @@ end complement
 
 function triad pColor
     local hsl, h, triad, tColor, tOldColor
-    
+
     put sColor into tOldColor
-    
+
     tinyColor pColor
     put toHsl() into hsl
     _objectToArray hsl
     put hsl["h"] into h
-    
+
     put toRgb(true) into triad[ 1 ]
-    
     put "{ h:" && (h + 120) mod 360, "s: " & hsl["s"], "l: " & hsl["l"] & " }" into tColor
     tinyColor tColor
+
     put toRgb(true) into triad[2]
-    
     put "{ h:" && (h + 240) mod 360, "s: " & hsl["s"], "l: " & hsl["l"] & " }" into tColor
     tinyColor tColor
+
     put toRgb(true) into triad[3]
-    
     put tOldColor into sColor
     return triad
 end triad
@@ -934,46 +930,46 @@ end triad
 
 function tetrad pColor
     local hsl, h, tetrad, tColor, tOldColor
-    
+
     put sColor into tOldColor
-    
+
     tinyColor pColor
     put toHsl() into hsl
     _objectToArray hsl
     put toRgb(true) into tetrad[ 1 ]
-    
+
     put "{ h:" & (h + 90) mod 360, "s: " & hsl["s"], "l: " & hsl["l"] && "}" into tColor
     tinyColor tColor
     put toRgb(true) into tetrad[2]
-    
+
     put  "{ h:" & (h + 180) mod 360, "s: " & hsl["s"], "l: " & hsl["l"] && "}" into tColor
     tinyColor tColor
     put toRgb(true) into tetrad[3]
-    
+
     put  "{ h:" & (h + 270) mod 360, "s: " & hsl["s"], "l: " & hsl["l"] && "}" into tColor
     tinyColor tColor
     put toRgb(true) into tetrad[4]
-    
+
     return tetrad
 end tetrad
 
 
 function splitcomplement pColor
     local hsl, h,  tSplitcomplement,  tOldColor
-    
+
     put sColor into tOldColor
     tinyColor pColor
+
     put toHsl() into hsl
     put toRgb(true) into tSplitcomplement[ 1 ]
     _objectToArray hsl
     put hsl["h"] into h
-    
+
     tinyColor ("{ h: " & (h + 72) mod 360, "s:" && hsl["s"], "l:" && hsl["l"] & " }")
     put toRgb(true) into tSplitcomplement[ 2 ]
-    
-    tinyColor("{ h: " & (h + 216) mod 360, "s:" && hsl["s"], "l:" && hsl["l"] & " }") 
+
+    tinyColor("{ h: " & (h + 216) mod 360, "s:" && hsl["s"], "l:" && hsl["l"] & " }")
     put toRgb(true) into tSplitcomplement[ 3 ]
-    
     put tOldColor into sColor
     return tSplitcomplement
 end splitcomplement
@@ -981,35 +977,35 @@ end splitcomplement
 
 function analogous pColor, pResults, pSlices
     local hsl, tColor, tPart, ret,  tOldColor, tResult
-    
+
     put sColor into tOldColor
     if pResults is no an integer then put 6 into pResults
     if pSlices is no an integer then put 30 into pSlices
-    
+
     tinyColor pColor
     put toHsl() into hsl
     _objectToArray hsl
-    
+
     put 360 / pSlices into tPart
     tinycolor pColor
     put toRgb(true) into tResult[ 1 ]
-    
+
     put (( hsl[ "h" ] - (  tPart * _rightShift( pResults , 1 )) )+ 720 ) mod 360 into hsl[ "h" ]
-    
+
     local index = 1
     repeat with x = (pResults - 1 ) down to 1
         add 1 to index
         put  ( hsl[ "h" ] + tPart ) mod 360 into hsl[ "h" ]
-        
-        tinyColor ("hsl" &&  hsl["h"] & ", "&  hsl["s"] & ", "&  hsl["l"]) 
+
+        tinyColor ("hsl" &&  hsl["h"] & ", "&  hsl["s"] & ", "&  hsl["l"])
         put toRgb(true) into tResult[ index ]
-        
+
     end repeat
-    
+
     --    repeat for each key k in tResult
-    --        put empty into tResult[ k]
+    --        put empty into tResult[k]
     --    end repeat
-    
+
     put tOldColor into sColor
     return tResult
 end analogous
@@ -1018,28 +1014,27 @@ end analogous
 
 function monochromatic pColor, results
     local hsv, tColor, ret, h, s, v, modification, tOldColor
-    
+
     if results is not an integer and (results < 1 or results > 6) then put 6 into results
     put sColor into tOldColor
-    
+
     tinycolor pColor
     put toHsv() into hsv
     _objectToArray hsv
-    
+
     put hsv["h"] into h
     put hsv["s"] into s
     put hsv["v"] into v
     put 1 / results into modification
-    
+
     local index = 0
     repeat with i = results down to 1
         add 1 to index
         tinyColor ("{ h: " & h," s: " & s," v: " & v & " }")
         put toRgb(true) into ret[ index ]
-        
         put (v + modification) mod 1 into v
     end repeat
-    
+
     put tOldColor into sColor
     return ret
 end monochromatic
@@ -1123,11 +1118,11 @@ function  mostReadable baseColor, colorList, args
     local bestColor = "", bestScore = 0, readability, includeFallbackColors, tLevel, tSize, tLength
     if args is empty then put "{}" into args
     _objectToArray args
-    
+
     put quote & args["includeFallbackColors"] & quote into includeFallbackColors
     put quote &  args["level"] & quote  into tLevel
     put quote &  args["size"] & quote  into tSize
-    
+
     put the number of elements of colorList into tLength
     repeat with i = 1 to tLength
         put tinyColor.readability(baseColor, colorList[i]) into readability
@@ -1136,14 +1131,14 @@ function  mostReadable baseColor, colorList, args
             put tinycolor( colorList[i] ) into bestColor
         end if
     end repeat
-    
+
     local tColor
     if tinycolor.isReadable(baseColor, bestColor, ("{" & quote & "level" & quote & ": " & tLevel, quote & "size" & quote &  ": " & tSize & " }")) or not includeFallbackColors then
         put sColor into tColor
         tinyColor bestColor
         put toRgb(true) into bestColor
         put tColor into sColor
-        
+
     else
         put false into args["includeFallbackColors"]
         put ArrayToJson(args) into args
@@ -1152,9 +1147,9 @@ function  mostReadable baseColor, colorList, args
         put sColor into tColor
         tinyColor mostReadable(baseColor, colorList, args);
         put toRgb(true) into bestColor
-        put tColor into sColor 
+        put tColor into sColor
     end if
-    
+
     return bestColor
 end mostReadable
 
@@ -1321,10 +1316,10 @@ function validateWCAG2Parms parms
 end validateWCAG2Parms
 
 
-function RgbToRgbString r, g, b 
+function RgbToRgbString r, g, b
     local tRgb
     put r, g, b  into tRgb
-    split tRgb by comma 
+    split tRgb by comma
 
     return "rgb " & tRgb[1] && tRgb[2] && tRgb[3]
 
@@ -1458,14 +1453,11 @@ private function isNaN n
 end isNaN
 
 private function _rightShift pNum, pOff
-    if pNum >= 0 then 
+    if pNum >= 0 then
         return trunc( pNum /(2^ pOff ))
     else
-        return  round( (pNum - 1) /(2 ^ pOff )) 
+        return  round( (pNum - 1) /(2 ^ pOff ))
     end if
 end _rightShift
 
 ### END Utilities ###
-
-
-
