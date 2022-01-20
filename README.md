@@ -1,13 +1,13 @@
 # TinyColor for LiveCode
 This LiveCode Script library is based on Brian Grinstead's TinyColor v1.4.2 microframework. Which was translated into LiveCode Script by the FerrusLogic team
 
---
+---
 ## How to use it
 To use the TinyColor library, you must download the TinyColor.livecodescript file, which you must include as a library in your LiveCode project.
 
 ## How does it work
 TinyColor works just like painting on a canvas. So we have to select a color to work with and smear our brush with this color. Once this is done, everything will be covered in this color. To smear our brush we call the tinyColor command and pass it the color we want to smear our brush with. This color must have a string format.
-Example
+Example:
 ```
 tinyColor "rgb 255 0 0"
 ```
