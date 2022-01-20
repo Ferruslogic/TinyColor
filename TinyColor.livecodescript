@@ -1160,7 +1160,6 @@ end mostReadable
 // ---------
 // Return a valid alpha value [0,1] with all invalid values being set to 1
 function boundAlpha pA
-    put parseFloat(pA) into pA
     if isNaN(pA) or pA < 0 or pA > 1 then
         put 1 into pA
     end if
@@ -1174,7 +1173,7 @@ function bound01 n, pMax
     if isOnePointZero(n) then put "100%" into n
 
     put isPercentage(n) into processPercent
-    put min(pMax, max(0, parseFloat(n))) into n
+    put min(pMax, max(0, n)) into n
 
     // Automatically convert percentage into number
     if processPercent is true then
@@ -1187,7 +1186,7 @@ function bound01 n, pMax
     end if
 
     // Convert into [0, 1] range if it isn't already
-    return (n mod pMax) / parseFloat(pMax)
+    return (n mod pMax) / pMax
 end bound01
 
 --// Force a number between 0 and 1
@@ -1232,7 +1231,7 @@ end convertToPercentage
 
 // Converts a decimal to a hex value
 function convertDecimalToHex d
-    return baseConvert(round(parseFloat(d) * 255),10,16)
+    return baseConvert(round(d * 255),10,16)
 end convertDecimalToHex
 
 
@@ -1436,17 +1435,6 @@ end toFixed
 --    end try
 --end parseInt
 
-private function parseFloat pString
-    local tFloat, d = 0
-    replace space with "" in pString
-    repeat for each char c in pString
-        if c is "." then add 1 to d
-        if c is not in "+-.0123456789" or d > 1 then exit repeat
-        put c after tFloat
-    end repeat
-    if "." is not in tFloat then return tFloat
-    return tFloat
-end parseFloat
 
 private function isNaN n
     return n is not a number and n is among the lines of the constantNames for value
