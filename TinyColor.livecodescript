@@ -18,46 +18,46 @@ local sTinyCounter = 0, sColor, sHexNames
 
 # Parameters
 # pColor: Color en formato string
-# pOpts["format"]: Formato de salida
-# pOpts["gradientType"]: Tipo de gradiente
+# pOpts["format"]: Output format
+# pOpts["gradientType"]: Gradient type
 function tinyColor pColor, pOpts
-    local rgb, tFormat
+   local rgb, tFormat
+   
+   delete local sColor
+   
+   put inputToRGB( pColor ) into rgb
+   if rgb is empty then return "error: input is not string color"
 
-    delete local sColor
-
-    put inputToRGB( pColor ) into rgb
-    if rgb is empty then   return "error: input is not string color"
-
-    put pColor into sColor["originalInput"]
-    put rgb["r"] into sColor["r"]
-    put rgb["g"] into sColor["g"]
-    put rgb["b"] into sColor["b"]
-    put rgb["a"] into sColor["a"]
-
-    if sColor["a"] is not a number then put 0 into sColor["a"]
-    put round(100* sColor["a"]) / 100 into sColor["roundA"]
-    if  rgb["a"] is a integer then put rgb["a"] into sColor["a"]
-
-    put pOpts["format"] into tFormat
-
-    if rgb["format"] is "" then put "rgb" into rgb["format"]
-    put rgb["format"] into sColor["format"]
-    put pOpts["gradientType"] into sColor["gradientType"]
-
-    // Don't let the range of [0,255] come back in [0,1].
-    // Potentially lose a little bit of precision here, but will fix issues where
-    // .5 gets interpreted as half of the total, instead of half of 1
-    // If it was supposed to be 128, this was already taken care of by `inputToRgb`
-    if sColor["r"] < 1 then put trunc( sColor["r"] ) into sColor["r"]
-    if sColor["g"] < 1 then put trunc( sColor["g"] ) into sColor["g"]
-    if sColor["b"] < 1 then put trunc( sColor["b"] ) into sColor["b"]
-
-    put rgb["ok"] into sColor["ok"]
-
-    add 1 to sTinyCounter
-    put sTinyCounter into sColor["tc_id"]
-
-    return toString(tFormat)
+   put pColor into sColor["originalInput"]
+   put rgb["r"] into sColor["r"]
+   put rgb["g"] into sColor["g"]
+   put rgb["b"] into sColor["b"]
+   put rgb["a"] into sColor["a"]
+   
+   if sColor["a"] is not a number then put 0 into sColor["a"]
+   put round(100* sColor["a"]) / 100 into sColor["roundA"]
+   if  rgb["a"] is a integer then put rgb["a"] into sColor["a"]
+   
+   put pOpts["format"] into tFormat
+   
+   if rgb["format"] is "" then put "rgb" into rgb["format"]
+   put rgb["format"] into sColor["format"]
+   put pOpts["gradientType"] into sColor["gradientType"]
+   
+   // Don't let the range of [0,255] come back in [0,1].
+   // Potentially lose a little bit of precision here, but will fix issues where
+   // .5 gets interpreted as half of the total, instead of half of 1
+   // If it was supposed to be 128, this was already taken care of by `inputToRgb`
+   if sColor["r"] < 1 then put trunc( sColor["r"] ) into sColor["r"]
+   if sColor["g"] < 1 then put trunc( sColor["g"] ) into sColor["g"]
+   if sColor["b"] < 1 then put trunc( sColor["b"] ) into sColor["b"]
+   
+   put rgb["ok"] into sColor["ok"]
+   
+   add 1 to sTinyCounter
+   put sTinyCounter into sColor["tc_id"]
+   
+   return toString(tFormat)
 end tinyColor
 
 
@@ -68,29 +68,30 @@ end tinyColor
 
 
 function getSystemAppearance
-    switch platform()
+   switch platform()
+      
       case "Win32"
-            local tType, tData, tDataReady
-            put queryRegistry("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize\AppsUseLightTheme",tType) into tData
-            put empty into tDataReady
-
-            repeat for each char tchar in tData
-                put chartonum(tchar) after tDataReady
-            end repeat
-
-            if tDataReady is "1000" then return "light"
-            else  if tDataReady is "0000" then return "dark"
-            return empty
-            break
-
-        case "MacOS";case "iphone";case "android"
-            if the systemAppearance contains "dark" then
-                return "dark"
-            else
-                return "light"
-            end if
-            break
-    end switch
+         local tType, tData, tDataReady
+         put queryRegistry("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize\AppsUseLightTheme",tType) into tData
+         put empty into tDataReady
+         
+         repeat for each char tchar in tData
+            put chartonum(tchar) after tDataReady
+         end repeat
+         
+         if tDataReady is "1000" then return "light"
+         else  if tDataReady is "0000" then return "dark"
+         return "undefined"
+         break
+         
+      case "MacOS";case "iphone";case "android"
+         if the systemAppearance contains "dark" then
+            return "dark"
+         else
+            return "light"
+         end if
+         break
+   end switch
 end getSystemAppearance
 
 
@@ -121,13 +122,15 @@ end getAlpha
 
 function getBrightness pRGB
     // http://www.w3.org/TR/AERT#color-contrast
-    local tRGB
+   local tRGB
+   
     put _fixRGB(pRGB) into tRGB
     return (tRGB["r"] * 299 + tRGB["g"] * 587 + tRGB["b"] * 114) / 1000
 end getBrightness
 
 function getLuminance pRGB
-    local tRGB, RsRGB, GsRGB, BsRGB, R, G, B
+   local tRGB, RsRGB, GsRGB, BsRGB, R, G, B
+   
     put _fixRGB(pRGB) into tRGB
     // http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
     split tRGB by comma
@@ -153,39 +156,41 @@ command  setAlpha pValue
     return sColor
 end setAlpha
 
+-------------------------------------
 function toHsv
-    local hsv
-    put rgbToHsv(sColor["r"], sColor["g"], sColor["b"]) into hsv
-    return "{ h:" & item 1 of hsv * 360," s:" & item 2 of hsv , "v:" & item 3 of hsv ,  "a:" & sColor["a"] &" }"
+   local hsv, h, s, v
+   
+   put rgbToHsv(sColor["r"], sColor["g"], sColor["b"]) into hsv
+   split hsv by comma
+   put round(hsv[1] * 360) into h
+   put round(hsv[2] * 100) into s
+   put round(hsv[3] * 100) into v
+   
+   if sColor["a"] is 0 then return  h & ", " & s & "%, " & v & "%"
+   else return h & ", " & s & "%, " & v & "%, " & sColor["roundA"]
 end toHsv
 
-function toHsvString
-    local hsv, h, s, v
-    put rgbToHsv(sColor["r"], sColor["g"], sColor["b"]) into hsv
-    split hsv by comma
-    put round(hsv[1] * 360) into h
-    put round(hsv[2] * 100) into s
-    put round(hsv[3] * 100) into v
 
-    if sColor["a"] is 0 then return "hsv(" & h & ", " & s & "%, " & v & "%)"
-    else return "hsva( " & h & ", " & s & "%, " & v & "%, " & sColor["roundA"] & " )"
+function toHsvString
+   if sColor["a"] is 0 then return "hsv(" & toHsv() & ")"
+   else return "hsva( " & toHsv() & ", " & sColor["roundA"] & " )"
 end toHsvString
 
+
 function toHsl
-    local hsl
-    put rgbToHsl(sColor["r"], sColor["g"], sColor["b"]) into hsl
-    return "{ h:" & the item 1 of hsl * 360, "s:" & the item 2 of hsl, "l:" & the item 3 of hsl, "a:" & sColor["a"] &" }"
+   local hsl, h, s, l
+   put rgbToHsl(sColor["r"], sColor["g"], sColor["b"]) into hsl
+   put round(the item 1 of hsl * 360) into h
+   put round(the item 2 of hsl * 100) into s
+   put round(the item 3 of hsl * 100) into l
+   
+   if sColor["a"] is 0 then return  h,s & "%, " & l & "%"
+   else return  h,s & "%, " & l & "%" & sColor["roundA"] 
 end toHsl
 
 function toHslString
-    local hsl, h, s, l
-    put rgbToHsl(sColor["r"], sColor["g"], sColor["b"]) into hsl
-    put round(the item 1 of hsl * 360) into h
-    put round(the item 2 of hsl * 100) into s
-    put round(the item 3 of hsl * 100) into l
-
-    if sColor["a"] is 0 then return "hsl("  & h & ", " & s & "%, " & l & "%)"
-    else return "hsla( " & h & ", " & s & "%, " & l & "%, " & sColor["roundA"] &  " )"
+   if sColor["a"] is 0 then return "hsl("  & toHsl() & "%)"
+   else return "hsla( " & toHsl() & ", " & sColor["roundA"] &  " )"
 end toHslString
 
 function toHex allow3Char
@@ -220,7 +225,7 @@ end toRgb
 
 
 function toRgbString
-    if sColor["a"] is 0 then return "rgb("  & round(sColor["r"]) &", " & round(sColor["g"])& ", " & round(sColor["b"]) & ")"
+    if sColor["a"] is a number then return "rgb("  & round(sColor["r"]) &", " & round(sColor["g"])& ", " & round(sColor["b"]) & ")"
     else return "rgba( " & round(sColor["r"])& ", " & round(sColor["g"]) & ", " & round(sColor["b"])& ", " & sColor["roundA"] & " )"
 end toRgbString
 
@@ -298,65 +303,64 @@ end toFilter
 
 
 function toString pFormat
-    local formatSet, formattedString = false, hasAlpha, needsAlphaFormat
-
-    if pFormat is empty then put sColor["format"] into pFormat
-
-    put not ( not pFormat) into formatSet
-    put sColor["a"] < 1 and sColor["a"] >= 0 into hasAlpha
-    put not formatSet and hasAlpha and (pFormat is among the items "rgb,rgba,hex,hex6,hex3,hex4,hex8,name") into needsAlphaFormat
-
-    if needsAlphaFormat then
-        // Special case for "transparent", all other non-alpha formats
-        // will return rgba when there is transparency.
-        if pFormat is "name"  then
-            return toName()
-        end if
-
-        return toRgbString()
-    end if
-
-    if pFormat is "rgb" then
-        put toRgbString() into formattedString
-    end if
-
-    if pFormat is "prgb" then
-        put toPercentageRgbString() into formattedString
-    end if
-
-    if pFormat is "hex" or pFormat is "hex6" then
-        put toHexString() into formattedString
-    end if
-
-    if pFormat is "hex3" then
-        put toHexString(true) into formattedString
-    end if
-
-    if pFormat is "hex4" then
-        put toHex8String(true) into formattedString
-    end if
-
-    if pFormat is "hex8" then
-        put toHex8String() into formattedString
-    end if
-
-    if pFormat is "name" then
-        put toName() into formattedString
-    end if
-
-    if pFormat is "hsl" then
-        put toHslString() into formattedString
-    end if
-
-    if pFormat is "hsv" then
-        put toHsvString() into formattedString
-    end if
-
-    if formattedString is empty then
-        return formattedString
-    else
-        return toHexString()
-    end if
+   local formatSet, formattedString = false, hasAlpha, needsAlphaFormat
+   
+   if pFormat is empty then put sColor["format"] into pFormat
+   
+   put sColor["a"] < 1 and sColor["a"] >= 0 into hasAlpha
+   --put not formatSet and hasAlpha and (pFormat is among the items "rgb,rgba,hex,hex6,hex3,hex4,hex8,name") into needsAlphaFormat
+   
+   if needsAlphaFormat then
+      // Special case for "transparent", all other non-alpha formats
+      // will return rgba when there is transparency.
+      if pFormat is "name"  then
+         return toName()
+      end if
+      
+      return toRgbString()
+   end if
+   
+   switch pFormat
+      case "rgb"
+         return toRgbString()
+         break
+         
+      case "prgb"
+         return toPercentageRgbString()
+         break
+         
+      case "hex"; case "hex6"
+         return toHexString()
+         break
+         
+      case "hex3"
+         return toHexString(true)
+         break
+         
+      case "hex4"
+         return toHex8String(true)
+         break
+         
+      case "hex8"
+         return toHex8String()
+         break
+         
+      case "name"
+         return toName()
+         break
+         
+      case  "hsl"
+         return toHslString()
+         break
+         
+      case "hsv"
+         return toHsvString()
+         break   
+         
+      default
+         return toHexString()
+   end switch
+   
 end toString
 
 private function tinyClone
