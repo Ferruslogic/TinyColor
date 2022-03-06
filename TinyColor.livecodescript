@@ -1,4 +1,13 @@
-script "tinyColor"
+# fix for RBG values which need to be passed as RGB (r, b, g), instead of "r,g,b" -- SK
+function colorForTiny pColor
+    if comma is in pColor then 
+        return "RGB (" & pColor & ")"
+    else
+        return pColor
+    end if
+end colorForTiny
+###################################################################
+
 # TinyColor v1.0.0b
 # Fast, small color manipulation and conversion for LiveCode.
 
@@ -89,11 +98,11 @@ end getSystemAppearance
 
 #### on tinyColor.prototype ####
 function isDark pRGB
-    return getBrightness() < 128
+    return getBrightness(pRGB) < 128
 end isDark
 
-function isLight
-    return not isDark()
+function isLight pRGB
+    return not isDark(pRGB)
 end isLight
 
 function isValid
@@ -116,7 +125,8 @@ function getBrightness pRGB
     // http://www.w3.org/TR/AERT#color-contrast
     local tRGB
     put _fixRGB(pRGB) into tRGB
-    return (tRGB["r"]* 299 + tRGB["g"]* 587 + tRGB["b"]* 114) / 1000
+    split tRGB by comma
+    return ((tRGB[1]* 299) + (tRGB[2]* 587) + (tRGB[3]* 114)) / 1000
 end getBrightness
 
 function getLuminance pRGB
@@ -432,7 +442,6 @@ function inputToRGB pColor
     // Input is liveCode RGB
     if the first char of pColor is a number and the number of items in pColor is 3 then
         put replaceText(pColor, space, empty) into rgb
-        replace space with empty in pColor
         split rgb by comma
         put rgb[1] into tResult["r"]
         put rgb[2] into tResult["g"]
