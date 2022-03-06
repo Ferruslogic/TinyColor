@@ -1,12 +1,4 @@
-# fix for RBG values which need to be passed as RGB (r, b, g), instead of "r,g,b" -- SK
-function colorForTiny pColor
-    if comma is in pColor then 
-        return "RGB (" & pColor & ")"
-    else
-        return pColor
-    end if
-end colorForTiny
-###################################################################
+script "tinyColor"
 
 # TinyColor v1.0.0b
 # Fast, small color manipulation and conversion for LiveCode.
