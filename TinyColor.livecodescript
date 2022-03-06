@@ -429,6 +429,18 @@ function inputToRGB pColor
         put true into tResult["ok"]
     end if
     
+    // Input is liveCode RGB
+    if the first char of pColor is a number and the number of items in pColor is 3 then
+        put replaceText(pColor, space, empty) into rgb
+        replace space with empty in pColor
+        split rgb by comma
+        put rgb[1] into tResult["r"]
+        put rgb[2] into tResult["g"]
+        put rgb[3] into tResult["b"]
+        put "rgb" into tResult["format"]
+        put true into tResult["ok"]
+    end if
+    
     if tResult["format"]is empty and typeof(pColor) is "string" then put stringInputToObject(pColor) into pColor
     
     if typeof(pColor) is "object" then
